@@ -1,0 +1,8 @@
+keras
+tensorflow-gpu
+python-socketio
+flask
+h5py
+eventlet
+pandas
+pillow
