@@ -24,34 +24,35 @@ import glob
 # y_train = np.append(y_train, data["steer"].as_matrix() - 0.2)
 
 funcs = [
-    ("center", lambda x, y:(x, y)),
-    ("left", lambda x, y:(x, y + 0.2)),
-    ("right", lambda x, y:(x, y - 0.2)),
+    ("center", lambda x, y, z:(x, y, z)),
+    ("left", lambda x, y, z:(x, y + 0.2, z - 0.5)),
+    ("right", lambda x, y, z:(x, y - 0.2, z - 0.5)),
 ]
 
 
 flip = [
-    lambda x, y:(x, y),
-    lambda x, y:(x[:, ::-1], -y)
+    lambda x, y, z:(x, y, z),
+    lambda x, y, z:(x[:, ::-1], -y, z)
 ]
 
 data = []
 for path in glob.iglob("/home/yjmade/Documents/*/*.csv"):
     img_folder = os.path.join(os.path.dirname(path), "IMG")
     csv_data = pd.read_csv(path, names=["center", "left", "right", "steer", "thottle", "break", "_"]).as_matrix()
-    data.append(np.concatenate([csv_data,np.reshape([img_folder]*csv_data.shape[0],[-1,1])],axis=1))
+    data.append(np.concatenate([csv_data, np.reshape([img_folder] * csv_data.shape[0], [-1, 1])], axis=1))
 data = np.concatenate(data, axis=0)
 np.random.shuffle(data)
 a_data = data
 data, valid_data = data[:int(len(data) * 0.9)], data[int(len(data) * 0.9):]
 print("Training data size:", data.shape[0])
 
+
 def gen_each_data(item):
     pos, func = random.choice(funcs)
     img = np.asarray(Image.open(get_image_path(item["img_folder"], item[pos])))
-    X, y = func(img, item["steer"])
-    X, y = random.choice(flip)(X, y)
-    return X, y
+    X, y, z = func(img, item["steer"], item["thottle"])
+    X, y, z = random.choice(flip)(X, y, z)
+    return X, [y, z]
 
 # @threadsafe_generator
 
@@ -106,11 +107,11 @@ model.add(Dense(50))
 model.add(Dropout(.6))
 model.add(Dense(10))
 model.add(Dropout(.5))
-model.add(Dense(1))
+model.add(Dense(2))
 
 model.compile(optimizer="adam", loss="mse")
 # model.fit(X_train, y_train, batch_size=32, epochs=3, verbose=1, callbacks=None, validation_split=0.2)
-batch_size = 256
+batch_size = 512
 if __name__ == "__main__":
     model.fit_generator(
         gen(data, batch_size),
