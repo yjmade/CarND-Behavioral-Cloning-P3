@@ -36,15 +36,18 @@ flip = [
 ]
 
 data = []
-for path in glob.iglob("/home/yjmade/Documents/*/*.csv"):
+paths = glob.glob("/home/yjmade/Documents/*/*.csv")
+print("train datas:", paths)
+for path in paths:
     img_folder = os.path.join(os.path.dirname(path), "IMG")
     csv_data = pd.read_csv(path, names=["center", "left", "right", "steer", "thottle", "break", "_"]).as_matrix()
-    data.append(np.concatenate([csv_data,np.reshape([img_folder]*csv_data.shape[0],[-1,1])],axis=1))
+    data.append(np.concatenate([csv_data, np.reshape([img_folder] * csv_data.shape[0], [-1, 1])], axis=1))
 data = np.concatenate(data, axis=0)
 np.random.shuffle(data)
 a_data = data
 data, valid_data = data[:int(len(data) * 0.9)], data[int(len(data) * 0.9):]
 print("Training data size:", data.shape[0])
+
 
 def gen_each_data(item):
     pos, func = random.choice(funcs)
@@ -89,33 +92,50 @@ def get_image_path(parent_folder, old_path):
 
 
 from keras.models import Sequential
-from keras.layers import Dense, Flatten, Lambda, Conv2D, Cropping2D, Dropout
+from keras.layers import Dense, Flatten, Lambda, Conv2D, Cropping2D, Dropout, Activation, BatchNormalization
 
 model = Sequential()
 model.add(Lambda(lambda x: (x - 128.) / 128., input_shape=(160, 320, 3)))
-model.add(Cropping2D(cropping=[(70, 25), (0, 0)]))
-model.add(Conv2D(24, (5, 5), strides=(2, 2), activation="relu"))
-model.add(Conv2D(36, (5, 5), strides=(2, 2), activation="relu"))
-model.add(Conv2D(48, (5, 5), strides=(2, 2), activation="relu"))
+model.add(Cropping2D(cropping=[(50, 25), (0, 0)]))
+
+
+model.add(Conv2D(24, (8, 8), subsample=(2, 2)))
+model.add(BatchNormalization())
+model.add(Activation("relu"))
+
+model.add(Conv2D(36, (5, 5), subsample=(2, 2)))
+model.add(BatchNormalization())
+model.add(Activation("relu"))
+
+model.add(Conv2D(48, (5, 5), subsample=(2, 2), activation="relu"))
 model.add(Conv2D(64, (3, 3), activation="relu"))
 model.add(Conv2D(64, (3, 3), activation="relu"))
 model.add(Flatten())
+model.add(Dropout(.4))
+
+model.add(Dense(256))
+model.add(Activation("relu"))
+model.add(Dropout(.4))
+
 model.add(Dense(100))
-model.add(Dropout(.7))
-model.add(Dense(50))
-model.add(Dropout(.6))
+model.add(Activation("relu"))
+model.add(Dropout(.4))
+
 model.add(Dense(10))
+model.add(Activation("relu"))
 model.add(Dropout(.5))
-model.add(Dense(1))
+
+model.add(Dense(1, activation="linear"))
+model.summary()
 
 model.compile(optimizer="adam", loss="mse")
 # model.fit(X_train, y_train, batch_size=32, epochs=3, verbose=1, callbacks=None, validation_split=0.2)
-batch_size = 256
+batch_size = 64
 if __name__ == "__main__":
     model.fit_generator(
         gen(data, batch_size),
-        steps_per_epoch=3 * len(data) / batch_size,
-        nb_epoch=10,
+        steps_per_epoch=6 * len(data) / batch_size,
+        nb_epoch=3,
         validation_data=gen(valid_data, batch_size),
         validation_steps=5,
         verbose=1,
