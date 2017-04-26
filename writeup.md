@@ -1,9 +1,4 @@
 #**Behavioral Cloning**
-
-##Writeup Template
-
-###You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
 ---
 
 **Behavioral Cloning Project**
@@ -143,13 +138,13 @@ Here is a visualization of the architecture
 
 To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
 
-![alt text][image2]
+![alt text](./output_images/center_2017_03_21_23_32_34_176.jpg)
 
 I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to steering hard when the turning is realy big. These images show what a recovery looks like starting from the left side :
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+![alt text](./output_images/recover_left1.jpg)
+![alt text](./output_images/recover_left2.jpg)
+![alt text](./output_images/recover_left3.jpg)
 
 Then I recorded more data in the vehicle turing in the sharp turns, vehicle on the bridge which get different texture from the normal road.
 
@@ -159,8 +154,8 @@ For track two, it's much more difficult for it's getting a lot of sharp turns, a
 
 To augment the dataset, I also flipped images and angles thinking that this would help to increase the number of train data, also helps to fight against the bias of track 1 that most of the turning is to the left, flip will balence the ratio to the left and right. For example, here is an image that has then been flipped:
 
-![alt text][image6]
-![alt text][image7]
+![alt text](./output_images/center_2017_03_21_23_32_34_176.jpg)
+![alt text](./output_images/center_2017_03_21_23_32_34_176_flipped.jpg)
 
 PS. This aproach is only valid when the data record from simulator is drive stick to the middle. For example if the data is collect with stick to right side of lanes like in real world:
 
@@ -181,3 +176,7 @@ I then preprocessed this data by:
 I finally randomly shuffled the data set and put 10% of the data into a validation set.
 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was 3 as evidenced by the decrease of validation score from the 4th epoch. I used an adam optimizer so that manually training the learning rate wasn't necessary.
+
+
+####4. Provide a link to the video
+Here's a [link to my video result](./output_images/project_video.mp4)
