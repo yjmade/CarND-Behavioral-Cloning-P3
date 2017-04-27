@@ -179,4 +179,6 @@ I used this training data for training the model. The validation set helped dete
 
 
 ####4. Provide a link to the video
-Here's a [link to my video result](./video_record.mp4)
+Here's a [link to my video result drive in track 1](./video_record.mp4)
+
+And this is [link to video result drive in track 1 reversely](./video_record_reverse.mp4)
